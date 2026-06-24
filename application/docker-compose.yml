@@ -2,6 +2,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
+    volumes:
+      - redis_data:/data
   backend:
     build:
       context: ./backend
@@ -21,3 +23,8 @@ services:
       - "80:80"
     depends_on: 
      - backend
+
+
+
+volumes:
+  redis_data:
