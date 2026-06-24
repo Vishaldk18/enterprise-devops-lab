@@ -18,8 +18,19 @@ except Exception:
 
 @app.route("/health")
 def health():
+ 
+    redis_status = "Connected"
+ 
+    try:
+        r.ping()
+    except Exception:
+        redis_status = "Disconnected"
+ 
     return jsonify({
-        "status": "UP"
+        "status": "UP",
+        "redis": redis_status,
+        "environment": ENVIRONMENT,
+        "version": VERSION
     })
 
 @app.route("/visitor-count")
