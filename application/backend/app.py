@@ -6,7 +6,7 @@ import socket
 app = Flask(__name__)
 
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
  
 ENVIRONMENT = os.getenv("ENVIRONMENT", "DEV")
 VERSION = os.getenv("VERSION", "1.0.0")
