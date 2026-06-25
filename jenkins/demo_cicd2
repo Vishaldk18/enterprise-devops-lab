@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -78,6 +79,7 @@ pipeline {
                 sh '''
                     docker tag backend:v1 \
                     372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-backend:latest
+
                     docker tag frontend:v1 \
                     372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-frontend:latest
                 '''
@@ -89,29 +91,10 @@ pipeline {
                 sh '''
                     docker push \
                     372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-backend:latest
+
                     docker push \
                     372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-frontend:latest
                 '''
-            }
-        }
-
-        stage('Deploy to EKS') {
-            steps {
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-creds']
-                ]) {
-                    sh '''
-                        aws eks update-kubeconfig \
-                          --region eu-north-1 \
-                          --name demo-cluster
-
-                        kubectl apply -f kubernetes/namespace/
-                        kubectl apply -f kubernetes/redis/
-                        kubectl apply -f kubernetes/backend/
-                        kubectl apply -f kubernetes/frontend/
-                    '''
-                }
             }
         }
     }

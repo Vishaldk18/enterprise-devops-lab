@@ -1,0 +1,66 @@
+pipeline{
+    agent any
+    stages{
+        // stage('Clean'){
+        //     steps{
+        //         deleteDir()
+        //     }
+        // }
+        stage('chekout code'){
+            steps{
+                git branch: 'main',
+    url: 'https://github.com/Vishaldk18/enterprise-devops-lab.git'
+            }
+        }
+        
+        stage('Doker check'){
+            steps{
+                sh 'docker version'
+            }
+        }
+        
+        // stage('Build Backend Image'){
+        //     steps{
+        //         sh '''
+        //         cd application/backend
+        //         docker build -t backend:v1 .
+        //         '''
+        //     }
+        // }
+        
+        // stage('Build Frontend Image'){
+        //     steps{
+        //         sh '''
+        //         cd application/frontend
+        //         docker build -t frontend:v1 .
+        //         '''
+        //     }
+        // }
+        
+        stage('Docker Compose Build'){
+            steps{
+                sh'''
+                cd application
+                docker compose build
+                '''
+            }
+        }
+        
+        stage('Docker Compose Up'){
+            steps{
+                sh'''
+                cd application
+                docker compose up -d
+                '''
+            }
+        }
+        
+        stage('Verify Containers'){
+            steps{
+                sh'''
+                docker ps
+                '''
+            }
+        }
+    }
+}
