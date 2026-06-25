@@ -1,0 +1,101 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Vishaldk18/enterprise-devops-lab.git'
+            }
+        }
+
+        stage('Docker Check') {
+            steps {
+                sh 'docker version'
+            }
+        }
+
+        stage('Docker Compose Build') {
+            steps {
+                sh '''
+                    cd application
+                    docker compose build
+                '''
+            }
+        }
+
+        /*
+        stage('Docker Compose Up') {
+            steps {
+                sh '''
+                    cd application
+                    docker compose up -d
+                '''
+            }
+        }
+
+        stage('Verify Containers') {
+            steps {
+                sh '''
+                    docker ps
+                '''
+            }
+        }
+        */
+
+        stage('AWS Test') {
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-creds']
+                ]) {
+                    sh '''
+                        aws sts get-caller-identity
+                    '''
+                }
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-creds']
+                ]) {
+                    sh '''
+                        aws ecr get-login-password --region eu-north-1 | \
+                        docker login \
+                        --username AWS \
+                        --password-stdin \
+                        372858676531.dkr.ecr.eu-north-1.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Tag Images') {
+            steps {
+                sh '''
+                    docker tag backend:v1 \
+                    372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-backend:latest
+
+                    docker tag frontend:v1 \
+                    372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-frontend:latest
+                '''
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                sh '''
+                    docker push \
+                    372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-backend:latest
+
+                    docker push \
+                    372858676531.dkr.ecr.eu-north-1.amazonaws.com/enterprise-frontend:latest
+                '''
+            }
+        }
+    }
+}
