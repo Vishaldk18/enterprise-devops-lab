@@ -34,10 +34,7 @@ spec:
         ports:
         - containerPort: 80
  
-        envFrom:
-        - configMapRef:
-            name: frontend-config
- 
+       
         resources:
           requests:
             cpu: "100m"
